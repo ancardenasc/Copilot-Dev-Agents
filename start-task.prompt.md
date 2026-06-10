@@ -1,7 +1,7 @@
 ---
-agent: 'agent'
+mode: 'agent'
 description: 'Inicializar una nueva tarea: checkout, nueva rama, tests y MR en GitLab'
-tools: ['jira/*', 'GitLab-MCP', 'terminal']
+tools: ['jira/*', 'GitLab-MCP/*', 'runInTerminal']
 ---
 
 Antes de comenzar pregunta al usuario los siguientes datos:
@@ -48,7 +48,7 @@ Con los datos obtenidos de Jira:
 
 Muestra el nombre generado al usuario y **pide confirmación** antes de continuar. Si el usuario rechaza el nombre, pídele que proporcione directamente su nombre preferido. Valida que siga kebab-case y no supere los 50 caracteres (sin contar el prefijo del ID del ticket), luego confirma una vez más antes de ejecutar el comando.
 
-Una vez confirmado:
+Una vez confirmado, crea la rama local usando la terminal:
 ```bash
 git new bdd-xxxx-nombre-de-la-rama
 ```
@@ -66,6 +66,7 @@ Antes de ejecutar los tests, genera el siguiente bloque de estado para poder rec
 - Nueva rama: <nombre-de-la-rama>
 ```
 
+Ejecuta los tests usando la terminal:
 ```bash
 yarn test --watchAll=false
 ```
@@ -75,19 +76,22 @@ yarn test --watchAll=false
 
 ---
 
-## Paso 4: Push de la rama
+## Paso 4: Publicar la rama en GitLab
 
+Usa el MCP **GitLab-MCP** para crear la rama en el repositorio remoto a partir de la rama base del Paso 1. Esto equivale a un `git push` inicial y evita depender de la terminal para el acceso remoto.
+
+Si la herramienta `create_branch` (o equivalente) del MCP GitLab no está disponible o devuelve un error, ejecuta el push como fallback desde la terminal:
 ```bash
 git push -u origin bdd-xxxx-nombre-de-la-rama
 ```
 
-Si el comando termina con un código distinto de cero, detente y muestra la salida del error. NO continúes al Paso 5. Pide al usuario que resuelva el problema (p. ej. force-push si la rama ya existe en remoto, o verificar permisos) y que confirme antes de reintentar.
+Si el fallback también falla (código de salida distinto de cero), detente y muestra la salida del error. NO continúes al Paso 5. Pide al usuario que resuelva el problema (p. ej. verificar permisos de escritura en el repositorio o si la rama ya existe en remoto) y que confirme antes de reintentar.
 
 ---
 
 ## Paso 5: Crear MR en GitLab
 
-Antes de crear el MR, verifica si ya existe un MR abierto con la misma rama fuente. Si existe, omite la creación e incluye su URL en el resumen final en lugar de crear uno nuevo.
+Antes de crear el MR, usa el MCP **GitLab-MCP** para verificar si ya existe un MR abierto con la misma rama fuente. Si existe, omite la creación e incluye su URL en el resumen final en lugar de crear uno nuevo.
 
 Usa el MCP **GitLab-MCP** para crear el Merge Request:
 - **Source branch:** la rama recién creada
